@@ -1,7 +1,8 @@
-package OOP.Tests;
+package OOP.Tests.UnitTests;
 
 import OOP.Provided.OOPExpectedException;
 import OOP.Solution.*;
+import OOP.Tests.TestUtilityClass;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

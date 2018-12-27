@@ -1,4 +1,4 @@
-package OOP.Tests;
+package OOP.Tests.UnitTests;
 
 import OOP.Provided.OOPResult;
 import OOP.Solution.OOPResultImpl;
