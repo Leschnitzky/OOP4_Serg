@@ -42,6 +42,11 @@ public class OOPExpectedExceptionImpl implements OOPExpectedException {
 
     @Override
     public boolean assertExpected(Exception e) {
-        return mExpected.isInstance(e);
+        if(mExpected == null){
+            return false;
+        }
+        return (mExpected.isInstance(e) && mExpectedMessages.stream().filter(
+                (x) -> {return (e.getMessage().indexOf(x) != 0);}
+        ));
     }
 }

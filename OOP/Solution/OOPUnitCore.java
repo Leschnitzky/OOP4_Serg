@@ -1,10 +1,13 @@
 package OOP.Solution;
 
 import OOP.Provided.OOPAssertionFailure;
+import OOP.Provided.OOPExceptionMismatchError;
+import OOP.Provided.OOPExpectedException;
 import OOP.Provided.OOPResult;
 import OOP.Tests.ExampleTest;
 import OOP.Tests.IntegrationTests.PartThreeIntegrationTests;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -130,19 +133,55 @@ public class OOPUnitCore {
                         e.printStackTrace();
                     } catch (InvocationTargetException e) {
                         Object thrown = e.getTargetException();
-                        if(thrown instanceof OOPAssertionFailure){
-                            OOPResult testResult = new OOPResultImpl(
-                                    OOPResult.OOPTestResult.FAILURE,
-                                    e.getTargetException().getMessage());
-                            testResults.put(x.getName(),testResult);
-                        } else if(false){
-                            //Check if expected
+                        OOPExpectedException expectedException = null;
+                        List<Field> lRuleField =            // check wheather there exists a rule
+                                Arrays.stream(finalInstance.getClass().getFields()).filter(
+                                        (rule)-> rule.getAnnotation(OOPExceptionRule.class) != null
+                                ).collect(Collectors.toList());
+                        if(lRuleField.isEmpty()){           // No Rule - Thrown Exception
+                            if(thrown instanceof OOPAssertionFailure){      //Check if assertion failure
+                                OOPResult testResult = new OOPResultImpl(
+                                        OOPResult.OOPTestResult.FAILURE,
+                                        e.getTargetException().getMessage());
+                                testResults.put(x.getName(),testResult);
+                            } else {                        // Thrown bad Exception
+                                OOPResult testResult = new OOPResultImpl(
+                                        OOPResult.OOPTestResult.ERROR,
+                                        e.getTargetException().getClass().getName());
+                                testResults.put(x.getName(),testResult);
+                            }
+
                         }
-                        else{
-                            OOPResult testResult = new OOPResultImpl(
-                                    OOPResult.OOPTestResult.ERROR,
-                                    e.getTargetException().getClass().getName());
-                            testResults.put(x.getName(),testResult);
+                        else {          //Exists a rule
+                            try {
+                                expectedException = (OOPExpectedException) lRuleField.get(0).get(finalInstance);
+                                if(thrown instanceof OOPAssertionFailure){      //Check if assertion failure
+                                    OOPResult testResult = new OOPResultImpl(
+                                            OOPResult.OOPTestResult.FAILURE,
+                                            e.getTargetException().getMessage());
+                                    testResults.put(x.getName(),testResult);
+                                }
+                                else if(expectedException.getExpectedException() == null){
+                                    // Exists a rule but not expecting exception, yet thrown
+                                    OOPResult testResult = new OOPResultImpl(
+                                            OOPResult.OOPTestResult.ERROR,
+                                            e.getTargetException().getClass().getName());
+                                    testResults.put(x.getName(),testResult);
+                                } else if(expectedException.assertExpected((Exception) thrown)){
+                                    // Expected Exception Caught
+                                    OOPResult testResult = new OOPResultImpl(OOPResult.OOPTestResult.SUCCESS);
+                                    testResults.put(x.getName(),testResult);
+                                }
+                                else {                            //Exception Mismatch
+                                    OOPResult testResult = new OOPResultImpl(
+                                            OOPResult.OOPTestResult.EXPECTED_EXCEPTION_MISMATCH,
+                                            new OOPExceptionMismatchError(expectedException.getExpectedException()
+                                                    ,thrown.getClass().asSubclass(Exception.class)).getMessage());
+                                    testResults.put(x.getName(),testResult);
+                                }
+                            } catch (IllegalAccessException e1) {
+                                e1.printStackTrace();
+                            }
                         }
 
                     }

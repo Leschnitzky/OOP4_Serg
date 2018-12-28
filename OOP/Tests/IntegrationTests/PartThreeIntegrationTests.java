@@ -1,5 +1,6 @@
 package OOP.Tests.IntegrationTests;
 
+import OOP.Provided.OOPExpectedException;
 import OOP.Solution.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -181,6 +182,8 @@ public class PartThreeIntegrationTests {
 
     @OOPTestClass
     public static class ThirdIntTest{
+        @OOPExceptionRule
+        public OOPExpectedException mExpectedException = OOPExpectedException.none();
 
         @OOPTest(order = 1, tag = "test1")
         public void passingTest(){}
@@ -193,6 +196,20 @@ public class PartThreeIntegrationTests {
         @OOPTest(order = 3, tag = "test3")
         public void errorTest() throws IOException {
             throw new IOException();
+        }
+
+        @OOPTest(order = 4, tag = "test4")
+        public void caughtExceptionTest() throws IOException {
+            mExpectedException.expect(IOException.class);
+            mExpectedException.expectMessage("correct message");
+            throw new IOException("correct message");
+        }
+
+        @OOPTest(order = 5, tag = "test5")
+        public void caughtIncorrect() throws IOException {
+            mExpectedException.expect(IOException.class);
+            mExpectedException.expectMessage("incorrect message");
+            throw new IOException("correct message");
         }
     }
 
@@ -333,6 +350,21 @@ public class PartThreeIntegrationTests {
         OOPTestSummary testSummary = OOPUnitCore.runClass(ThirdIntTest.class,"test3");
         assertEquals(testSummary.getNumErrors(), 1);
     }
+
+    @Test
+    public void testASimpleCoughtExpectedExceptionWithCorrectMessage(){
+        OOPTestSummary testSummary = OOPUnitCore.runClass(ThirdIntTest.class,"test4");
+        assertEquals(testSummary.getNumSuccesses(), 1);
+    }
+
+    @Test
+    public void testASimpleCaughtExpectedExceptionWithIncorrectMessage(){
+        OOPTestSummary testSummary = OOPUnitCore.runClass(ThirdIntTest.class,"test5");
+        assertEquals(testSummary.getNumExceptionMismatches(), 1);
+    }
+
+
+
 
 
 

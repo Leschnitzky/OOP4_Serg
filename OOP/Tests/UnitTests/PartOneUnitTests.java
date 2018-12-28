@@ -139,6 +139,12 @@ public class PartOneUnitTests extends TestUtilityClass {
     }
 
     @Test
+    public void testPassNullAssertException(){
+        mException.expect(IOException.class);
+        assertFalse(mException.assertExpected(null));
+    }
+
+    @Test
     public void testExpectedMultipleMessages(){
         mException.expect(Exception.class);
         try{
