@@ -132,6 +132,18 @@ public class PartOneUnitTests extends TestUtilityClass {
     }
 
     @Test
+    public void testAssertExceptionSubstring(){
+        mException.expect(Exception.class);
+        mException.expectMessage("ring").expectMessage("on");
+        Exception e = new Exception("substring onion");
+        Exception e2 = new Exception("strong ringer");
+        Exception e3 = new Exception("substring");
+        assertTrue(mException.assertExpected(e));
+        assertTrue(mException.assertExpected(e2));
+        assertFalse(mException.assertExpected(e3));
+    }
+
+    @Test
     public void testAssertExceptionFather(){
         mException.expect(IOException.class);
         Exception e = new Exception();
@@ -155,6 +167,7 @@ public class PartOneUnitTests extends TestUtilityClass {
             fail();
         }
     }
+
 
     @Test
     public void testOOPTestClassDefaultValues() throws IllegalAccessException, InstantiationException {

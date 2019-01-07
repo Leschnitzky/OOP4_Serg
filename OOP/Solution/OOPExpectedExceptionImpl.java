@@ -42,11 +42,20 @@ public class OOPExpectedExceptionImpl implements OOPExpectedException {
 
     @Override
     public boolean assertExpected(Exception e) {
-        if(mExpected == null){
+        if(mExpected == null || e == null){
             return false;
         }
-        return (mExpected.isInstance(e) && mExpectedMessages.stream().filter(
-                (x) -> {return (e.getMessage().indexOf(x) != 0);}
-        ));
+        return (mExpected.isInstance(e)
+                && (mExpectedMessages.size() == 0 | mExpectedMessages.stream().filter(
+                (x) -> {
+                    if(e.getMessage() == null){
+                        return false;
+                    } else {
+                        return e.getMessage().indexOf(x) != -1;
+                    }
+                }
+        ).count() == mExpectedMessages.size()
+
+        )); //Add contains message as substring
     }
 }
